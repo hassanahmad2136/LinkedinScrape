@@ -12,15 +12,30 @@ from parseurl import remove_url_parameters
 data = pd.read_csv("companies_unique.csv")
 urls = data["Company Linkedin Link"]
 
+# Set cookie expiration
+expiry_date = datetime.now() + timedelta(days=60)
+expiry_timestamp = int(time.mktime(expiry_date.timetuple()))
+
+# li_at cookie value
+value = 'REPLACE_WITH_COOKIE_VALUE'
+
 # Initialize driver
 driver = get_driver()
 driver.get("https://www.linkedin.com/")
 
+# Add cookie
+li_at_cookie = {
+    'name': 'li_at',
+    'value': value,
+    'domain': '.linkedin.com',
+    'expiry': expiry_timestamp,
+    'path': '/',
+    'secure': True,
+    'httpOnly': True
+}
 
-while "feed" not in driver.current_url: pass
-
-print("Logged In")
-
+driver.add_cookie(li_at_cookie)
+driver.refresh()
 
 # Initialize lists
 webs = []
@@ -28,9 +43,9 @@ talent_roles = []
 
 # Iterate through URLs
 for url in urls:
-    time.sleep(2)
     url = remove_url_parameters(url)
-    driver.get(url + "/about")
+    url_about = url + "/about"
+    driver.execute_script(f"window.location.href='{url_about}'")
     print(f"Scraping: {url}")
     # Wait for the element to be present
     try:
@@ -43,9 +58,10 @@ for url in urls:
         print(f"Error1: {e}")
         continue
     time.sleep(1)
-    driver.get(url+"/people")
+    url_people = url+"/people"
+    driver.execute_script(f"window.location.href='{url_people}'")
     links = []
-    time.sleep(1)
+    time.sleep(4)
     if "talent" not in driver.current_url:
         try:
             value = "Search employees by title, keyword or school"
