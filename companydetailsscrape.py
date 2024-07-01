@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from initdriver import get_driver
 import pandas as pd
-from parseurl import remove_url_parameters
+from parseurl import remove_url_parameters, originalSubdomain
 
 # Load data
 data = pd.read_csv("companies_unique.csv")
@@ -17,8 +17,7 @@ expiry_date = datetime.now() + timedelta(days=60)
 expiry_timestamp = int(time.mktime(expiry_date.timetuple()))
 
 # li_at cookie value
-value = 'REPLACE_WITH_COOKIE_VALUE'
-
+value = "REPLACE_WITH_COOKIE"
 # Initialize driver
 driver = get_driver()
 driver.get("https://www.linkedin.com/")
@@ -58,7 +57,8 @@ for url in urls:
         print(f"Error1: {e}")
         continue
     time.sleep(1)
-    url_people = url+"/people"
+    url_people = url+"/people?keywords=talent"
+    url_people = originalSubdomain(url_people)
     driver.execute_script(f"window.location.href='{url_people}'")
     links = []
     time.sleep(4)
@@ -73,6 +73,7 @@ for url in urls:
             driver.execute_script("arguments[0].scrollIntoView()", input)
             time.sleep(1)
             input.send_keys("talent")
+            time.sleep(1)
             input.send_keys(Keys.ENTER)
             value = "Keyword search already applied"
             web_element = WebDriverWait(driver, 30).until(
@@ -88,7 +89,7 @@ for url in urls:
             EC.presence_of_element_located((By.CSS_SELECTOR, "li.grid.grid__col--lg-8.block.org-people-profile-card__profile-card-spacing"))
         )
     except Exception as e:
-        print(e)
+        print("No members found")
         continue
     li = 0
     while 1:
@@ -100,6 +101,7 @@ for url in urls:
         for card in new_cards:
             li+=1
             driver.execute_script("arguments[0].scrollIntoView()",card)
+            time.sleep(0.1)
             role = card.find_element(By.CSS_SELECTOR,"div.ember-view.lt-line-clamp.lt-line-clamp--multi-line")
             try:
                 link = card.find_element(By.TAG_NAME,"a").get_attribute("href")
