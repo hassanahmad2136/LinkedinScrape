@@ -17,6 +17,7 @@ def get_driver():
     chrome_options.add_argument("--disable-accelerated-2d-canvas")
     # chrome_options.add_argument("--proxy-server='direct://")
     # chrome_options.add_argument("--proxy-bypass-list=*")
+    chrome_options.add_argument("--start-maximized")
     chrome_options.add_argument("--allow-running-insecure-content")
     chrome_options.add_argument("--disable-web-security")
     chrome_options.add_argument("--disable-client-side-phishing-detection")
@@ -37,5 +38,7 @@ def get_driver():
     )
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver.execute_cdp_cmd('Network.enable', {})
+    driver.execute_cdp_cmd('Page.setBypassCSP', {'enabled': True})
     return driver
 
