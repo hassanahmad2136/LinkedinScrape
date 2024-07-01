@@ -1,5 +1,5 @@
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
-
+import re
 def construct_url(title,location,time = 336):
     url = 'https://www.linkedin.com/jobs/search'
 
@@ -34,3 +34,12 @@ def remove_url_parameters(url):
     url_without_parameters = urlunparse(parsed_url._replace(query=''))
 
     return url_without_parameters
+
+def originalSubdomain(url):
+    pattern = re.compile(r"https://(.*?)\.linkedin\.com")
+    match = pattern.search(url)
+    if match:
+        extracted_word = match.group(1)
+        modified_url = url.replace(f"{extracted_word}.", "")
+        url = modified_url + f"&originalSubdomain={extracted_word}"
+    return url
