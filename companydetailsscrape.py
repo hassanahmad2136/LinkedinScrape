@@ -17,7 +17,7 @@ expiry_date = datetime.now() + timedelta(days=60)
 expiry_timestamp = int(time.mktime(expiry_date.timetuple()))
 
 # li_at cookie value
-value = "REPLACE_WITH_COOKIE"
+value = "AQEFAHQBAAAAABBPwTQAAAGQdg9S6gAAAZG7cqJETgAAF3VybjpsaTptZW1iZXI6ODQxNzMwMDcxpiKL9np_cud2tWoSox2jQtLH0MhlMsl1wFDOTG2_3Oxdq2r7NTzJCdSnd1TViAFjRHU3dkZN7UrfS2iAFLE_9AclasymUGz9MZ1oHutAX2O2tJErVRiWxX9oQrA00fGQHyoIgjhD5qk0UjNVp4d9Th7UhxfcGw3VoJh9oYxyNJUnBAIKfub0qD2wXBTHWu3kFDwLRA"
 # Initialize driver
 driver = get_driver()
 driver.get("https://www.linkedin.com/")
@@ -57,6 +57,19 @@ for url in urls:
         print(f"Error1: {e}")
         continue
     time.sleep(1)
+    try:
+        emp = driver.find_element(By.XPATH, "//a[contains(@href, '/search/results/people/?currentCompany')]//span")
+        text_emp = emp.text
+        if "K" in text_emp:
+            text_emp = text_emp.replace("K","000")
+        if "+" in text_emp:
+            text_emp = text_emp.replace("+","")
+        text_emp = text_emp.replace(" employees","")
+        text_emp = text_emp.split('-')[1]
+        if int(text_emp) >= 500:
+            continue
+    except Exception as e:
+        pass
     url_people = url+"/people?keywords=talent"
     url_people = originalSubdomain(url_people)
     driver.execute_script(f"window.location.href='{url_people}'")
@@ -108,7 +121,6 @@ for url in urls:
             except:
                 continue
             if "talent" in role.text.lower():
-                print(link)
                 links.append(link)
         button = driver.find_elements(By.XPATH,
                                       "//*[self::div or self::button or self::span][contains(text(), 'See more')]")
